@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgenticCI — Multi-Agent CI/CD Pipeline Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background Decorators for Glassmorphism -->
+    <div class="glass-bg">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- HEADER SECTION -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1>AgenticCI</h1>
+                    <p>Autonomous Multi-Agent DevOps Pipeline</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Gemini Integration Configuration -->
+                <div class="config-trigger" id="configTriggerBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Configure AI Pipeline</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONFIG MODAL (SLIDEOUT PANEL) -->
+        <div class="config-modal-overlay" id="configOverlay"></div>
+        <div class="config-side-panel" id="configSidePanel">
+            <div class="panel-header">
+                <h2>AI Agent Orchestrator Settings</h2>
+                <button class="close-panel-btn" id="closePanelBtn">&times;</button>
+            </div>
+            <div class="panel-body">
+                <div class="setting-group">
+                    <label for="geminiApiKey">Gemini 2.5 API Key</label>
+                    <input type="password" id="geminiApiKey" placeholder="AIzaSy..." autocomplete="off">
+                    <p class="setting-hint">Optional. Connects DevBot (Peer Review Agent) directly to live LLM for real-time arbitrary code assessments. If empty, a sophisticated rule-based parser engine evaluates your files instantly.</p>
+                </div>
+                <div class="setting-group">
+                    <label for="developerName">Developer (Git Author)</label>
+                    <input type="text" id="developerName" value="Sangeeta Verma">
+                </div>
+                <button class="save-settings-btn" id="saveSettingsBtn">Apply Orchestrator Settings</button>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT GRID -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT PANEL: SANDBOX IDE -->
+            <section class="panel-card ide-panel">
+                <div class="panel-title-bar">
+                    <div class="title-left">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 18L22 12L16 6M8 6L2 12L8 18"/>
+                        </svg>
+                        <h3>Developer Sandbox</h3>
+                    </div>
+                    <div class="ide-language-badge">
+                        <span id="langBadge">PYTHON 3.14</span>
+                    </div>
+                </div>
+
+                <!-- PRESETS ROW -->
+                <div class="presets-container">
+                    <button class="preset-btn active" data-preset="clean_py">
+                        <span class="preset-icon text-success">✓</span>
+                        <span class="preset-label">Clean Calculator</span>
+                    </button>
+                    <button class="preset-btn" data-preset="lint_py">
+                        <span class="preset-icon text-warning">⚠️</span>
+                        <span class="preset-label">Lint Defects</span>
+                    </button>
+                    <button class="preset-btn" data-preset="logic_py">
+                        <span class="preset-icon text-error">❌</span>
+                        <span class="preset-label">QA Test Failure</span>
+                    </button>
+                    <button class="preset-btn" data-preset="security_py">
+                        <span class="preset-icon text-critical">🔐</span>
+                        <span class="preset-label">Security Hazard</span>
+                    </button>
+                </div>
+
+                <!-- CODE EDITOR -->
+                <div class="code-editor-wrapper">
+                    <div class="line-numbers" id="editorLineNumbers">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12</div>
+                    <textarea class="code-editor-textarea" id="codeEditor" spellcheck="false" autocomplete="off"></textarea>
+                </div>
+
+                <!-- COMMIT FORM -->
+                <div class="commit-footer">
+                    <div class="commit-meta-inputs">
+                        <div class="input-wrap">
+                            <label>Commit Message</label>
+                            <input type="text" id="commitMessage" value="feat: restructure math operations module">
+                        </div>
+                    </div>
+                    <button class="push-btn" id="pushButton">
+                        <span class="btn-spinner hidden" id="pushSpinner"></span>
+                        <span class="btn-text">🚀 COMMIT & PUSH TO GITHUB</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- RIGHT PANEL: PIPELINE VISUALS & DETAILED TABS -->
+            <div class="pipeline-column">
+                
+                <!-- TOP CARD: PIPELINE MAP -->
+                <section class="panel-card pipeline-map-panel">
+                    <div class="panel-title-bar">
+                        <div class="title-left">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            <h3>CI/CD Pipeline Flow</h3>
+                        </div>
+                        <div class="pipeline-global-status" id="globalStatusBadge">IDLE</div>
+                    </div>
+
+                    <!-- Horizontal Nodes Map -->
+                    <div class="pipeline-graph">
+                        <!-- Node 1 -->
+                        <div class="pipeline-node" id="node-commit" data-stage="commit">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">1. Check-in</span>
+                        </div>
+                        
+                        <div class="connector-line" id="line-1"></div>
+
+                        <!-- Node 2 -->
+                        <div class="pipeline-node" id="node-lint" data-stage="lint">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">2. Linter</span>
+                        </div>
+
+                        <div class="connector-line" id="line-2"></div>
+
+                        <!-- Node 3 -->
+                        <div class="pipeline-node" id="node-review" data-stage="review">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">3. Sr Reviewer</span>
+                        </div>
+
+                        <div class="connector-line" id="line-3"></div>
+
+                        <!-- Node 4 -->
+                        <div class="pipeline-node" id="node-qa" data-stage="qa">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">4. QA Agent</span>
+                        </div>
+
+                        <div class="connector-line" id="line-4"></div>
+
+                        <!-- Node 5 -->
+                        <div class="pipeline-node" id="node-hitl" data-stage="hitl">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">5. Human Gate</span>
+                        </div>
+
+                        <div class="connector-line" id="line-5"></div>
+
+                        <!-- Node 6 -->
+                        <div class="pipeline-node" id="node-deploy" data-stage="deploy">
+                            <div class="node-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                                </svg>
+                            </div>
+                            <span class="node-label">6. Deploy</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BOTTOM CARD: AGENT TABS INTERFACE -->
+                <section class="panel-card details-tabs-panel">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="terminal">
+                            <span>💻 Live Console</span>
+                        </button>
+                        <button class="tab-btn" data-tab="linter">
+                            <span>🛡️ LinterBot</span>
+                            <span class="tab-badge hidden" id="linterBadge">0</span>
+                        </button>
+                        <button class="tab-btn" data-tab="review">
+                            <span>🤖 DevBot Review</span>
+                            <span class="tab-status-dot dot-idle" id="reviewDot"></span>
+                        </button>
+                        <button class="tab-btn" data-tab="qa">
+                            <span>🧪 QABot Tests</span>
+                            <span class="tab-status-dot dot-idle" id="qaDot"></span>
+                        </button>
+                        <button class="tab-btn highlight-tab" data-tab="hitl">
+                            <span>👑 HITL Gate</span>
+                            <span class="pulse-ring hidden" id="hitlPulseRing"></span>
+                        </button>
+                    </div>
+
+                    <!-- TABS BODY CONTENT -->
+                    <div class="tabs-body">
+                        
+                        <!-- TAB 1: TERMINAL LOGS -->
+                        <div class="tab-content active" id="content-terminal">
+                            <div class="terminal-wrapper">
+                                <div class="terminal-header">
+                                    <div class="term-dots">
+                                        <span class="dot red"></span>
+                                        <span class="dot yellow"></span>
+                                        <span class="dot green"></span>
+                                    </div>
+                                    <span class="terminal-title">bash — runner@agenticci.sh</span>
+                                    <button class="clear-term-btn" id="clearTermBtn">Clear</button>
+                                </div>
+                                <div class="terminal-body" id="terminalLogs">
+                                    <div class="term-line system-msg">Welcome to AgenticCI Terminal. Push code changes in the sandbox IDE to trigger active agents.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: LINTER ANALYSIS -->
+                        <div class="tab-content" id="content-linter">
+                            <div class="agent-profile">
+                                <div class="agent-avatar">🛡️</div>
+                                <div class="agent-meta">
+                                    <h4>LinterBot</h4>
+                                    <p>Static Code Quality & AST Validator</p>
+                                </div>
+                            </div>
+                            <div class="agent-detail-body">
+                                <div class="linter-stats">
+                                    <div class="stat-card">
+                                        <div class="stat-num" id="lintErrCount">0</div>
+                                        <div class="stat-lbl">Errors</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-num" id="lintWarnCount">0</div>
+                                        <div class="stat-lbl">Warnings</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-num" id="lintInfoCount">0</div>
+                                        <div class="stat-lbl">Style Tips</div>
+                                    </div>
+                                </div>
+                                <div class="lint-violations-list" id="lintIssuesList">
+                                    <div class="empty-state">
+                                        <p>No static analysis has run yet. Commit your changes to invoke LinterBot.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: DEV REVIEW AGENT -->
+                        <div class="tab-content" id="content-review">
+                            <div class="agent-profile">
+                                <div class="agent-avatar">🤖</div>
+                                <div class="agent-meta">
+                                    <h4>DevBot</h4>
+                                    <p>Senior Developer Agent — Peer Code Reviewer</p>
+                                </div>
+                            </div>
+                            <div class="agent-detail-body">
+                                <div class="reviewer-decision-card class-idle" id="reviewDecisionCard">
+                                    <div class="decision-header">
+                                        <span class="decision-icon">💤</span>
+                                        <h4 id="reviewDecisionText">Awaiting Pipeline Start</h4>
+                                    </div>
+                                    <p class="decision-desc" id="reviewSummaryText">The senior review agent will output a comprehensive review summary and list specific inline improvement ideas once you trigger the pipeline.</p>
+                                </div>
+                                <div class="review-annotations-section">
+                                    <h5>Inline Code Review Annotations</h5>
+                                    <div class="annotations-list" id="reviewAnnotationsList">
+                                        <div class="empty-state">No comments yet.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 4: QA AGENT TESTS -->
+                        <div class="tab-content" id="content-qa">
+                            <div class="agent-profile">
+                                <div class="agent-avatar">🧪</div>
+                                <div class="agent-meta">
+                                    <h4>QABot</h4>
+                                    <p>Quality Assurance Testing Specialist Agent</p>
+                                </div>
+                            </div>
+                            <div class="agent-detail-body">
+                                <div class="qa-grid">
+                                    <!-- Metric gauges -->
+                                    <div class="qa-metrics">
+                                        <div class="coverage-gauge">
+                                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                <path class="circle" id="coverageProgress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                <text x="18" y="20.35" class="percentage" id="coverageValue">0%</text>
+                                            </svg>
+                                            <span class="gauge-lbl">Test Coverage</span>
+                                        </div>
+                                        <div class="qa-counts">
+                                            <div class="qa-c-item">
+                                                <span class="c-lbl">Tests Run:</span>
+                                                <strong id="qaTotalCount">0</strong>
+                                            </div>
+                                            <div class="qa-c-item">
+                                                <span class="c-lbl">Passed:</span>
+                                                <strong class="text-success" id="qaPassedCount">0</strong>
+                                            </div>
+                                            <div class="qa-c-item">
+                                                <span class="c-lbl">Failed:</span>
+                                                <strong class="text-error" id="qaFailedCount">0</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Test list -->
+                                    <div class="test-suites-panel">
+                                        <h5>Test Cases Executed</h5>
+                                        <div class="test-cases-list" id="testCasesList">
+                                            <div class="empty-state">No test suite executed yet.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 5: HITL APPROVAL GATE -->
+                        <div class="tab-content" id="content-hitl">
+                            <div class="agent-profile">
+                                <div class="agent-avatar">👑</div>
+                                <div class="agent-meta">
+                                    <h4>Human-in-the-Loop Release Gate</h4>
+                                    <p>Authorized Manual Branch Merge & Deploy Approver</p>
+                                </div>
+                            </div>
+                            <div class="agent-detail-body">
+                                <div class="hitl-board disabled" id="hitlBoard">
+                                    <div class="hitl-waiting-banner" id="hitlWaitingBanner">
+                                        <div class="gate-spinner"></div>
+                                        <h3>Pipeline is running...</h3>
+                                        <p>The manual gate is currently locked. Awaiting completion of automated Linter, DevBot Peer Review, and QABot Test executions before soliciting your approval.</p>
+                                    </div>
+
+                                    <div class="hitl-gate-panel hidden" id="hitlGatePanel">
+                                        <div class="pr-card">
+                                            <div class="pr-header">
+                                                <span class="pr-badge">PULL REQUEST #1</span>
+                                                <h4 id="hitlPrTitle">Restructure math operations module</h4>
+                                                <p class="pr-branch-arrow">
+                                                    <span class="branch-pill">feature/math-fixes</span>
+                                                    <span class="arrow-sym">→</span>
+                                                    <span class="branch-pill">main</span>
+                                                </p>
+                                            </div>
+
+                                            <div class="pr-results-grid">
+                                                <div class="pr-res-card" id="pr-res-lint">
+                                                    <h5>🛡️ Static Lint</h5>
+                                                    <div class="res-body">Awaiting Run</div>
+                                                </div>
+                                                <div class="pr-res-card" id="pr-res-review">
+                                                    <h5>🤖 Peer Review</h5>
+                                                    <div class="res-body">Awaiting Run</div>
+                                                </div>
+                                                <div class="pr-res-card" id="pr-res-qa">
+                                                    <h5>🧪 QA Testing</h5>
+                                                    <div class="res-body">Awaiting Run</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Merging interactive action console -->
+                                            <div class="hitl-gate-actions">
+                                                <div class="gate-recommendation">
+                                                    <p>🌟 <strong>System Recommendation:</strong> <span id="gateRecText">Awaiting quality checks to issue recommendation.</span></p>
+                                                </div>
+                                                <div class="gate-btn-group">
+                                                    <button class="gate-btn reject-btn" id="rejectPRBtn">
+                                                        <span>❌ Reject & Request Changes</span>
+                                                    </button>
+                                                    <button class="gate-btn approve-btn" id="approvePRBtn">
+                                                        <span>✅ Approve & Deploy to Production</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Notification system toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
