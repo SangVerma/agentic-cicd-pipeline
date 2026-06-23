@@ -16,7 +16,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-size: '3.10'
           python-version: '3.10'
 
       - name: Install Linters and Testers
@@ -25,18 +24,20 @@ jobs:
           pip install flake8 pytest
 
       - name: 🛡️ Stage 1: Static Lint Analysis (LinterBot)
+        id: lint
+        continue-on-error: true
         run: |
-          # run flake8 linter, ignore node_modules
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=node_modules
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=node_modules
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=node_modules > lint_output.log 2>&1
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=node_modules >> lint_output.log 2>&1
 
       - name: 🧪 Stage 2: Regression Testing (QABot)
+        id: tests
+        continue-on-error: true
         run: |
-          # run pytest unit tests
-          pytest -v
+          pytest -v > pytest_output.log 2>&1
 
       - name: 🤖 Stage 3: Peer Code Review (DevBot Agent)
-        if: always() # Run even if linter or tests fail to provide feedback
+        if: always()
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,4 +48,23 @@ jobs:
             echo "⚠️ Warning: GEMINI_API_KEY secret is not set. Skipping DevBot Review."
           else
             python agent_review.py
+          fi
+
+      - name: 🩹 Stage 4: Self-Healing Auto-Correction (FixBot Agent)
+        if: always()
+        id: fixer
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "${{ steps.lint.outcome }}" = "failure" ] || [ "${{ steps.tests.outcome }}" = "failure" ]; then
+            if [ -z "$GEMINI_API_KEY" ]; then
+              echo "❌ Quality Gate Failed and GEMINI_API_KEY is not set. Cannot run FixBot."
+              exit 1
+            fi
+            echo "🩹 Quality gate failed. Triggering FixBot self-healing agent..."
+            python agent_fixer.py
+          else
+            echo "✅ All gates passed. No self-healing needed."
           fi
