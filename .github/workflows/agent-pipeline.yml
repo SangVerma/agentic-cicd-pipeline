@@ -1,0 +1,50 @@
+name: Multi-Agent CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-size: '3.10'
+          python-version: '3.10'
+
+      - name: Install Linters and Testers
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+
+      - name: 🛡️ Stage 1: Static Lint Analysis (LinterBot)
+        run: |
+          # run flake8 linter, ignore node_modules
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=node_modules
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=node_modules
+
+      - name: 🧪 Stage 2: Regression Testing (QABot)
+        run: |
+          # run pytest unit tests
+          pytest -v
+
+      - name: 🤖 Stage 3: Peer Code Review (DevBot Agent)
+        if: always() # Run even if linter or tests fail to provide feedback
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "⚠️ Warning: GEMINI_API_KEY secret is not set. Skipping DevBot Review."
+          else
+            python agent_review.py
+          fi
